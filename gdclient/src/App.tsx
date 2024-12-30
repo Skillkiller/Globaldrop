@@ -15,41 +15,21 @@ import {
   InputOTPSeparator,
 } from "./components/ui/input-otp";
 import { Button } from "./components/ui/button";
-import { Copy } from "lucide-react";
+import { Copy, GalleryVerticalEnd, Unplug } from "lucide-react";
 import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./hooks/use-toast";
 import { Badge } from "./components/ui/badge";
+import IdentShow from "./components/ident-show";
+import { Separator } from "./components/ui/separator";
+import { ConnectionCard } from "./components/connection-card";
+import { PeerEntity } from "./lib/Peer";
+import { addDataConnectionListener } from "./lib/utils";
 
 function App() {
-  const peerRef = useRef<Peer | null>();
-
-  const formRef = useRef<HTMLFormElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
+  const peerRef = useRef<Peer>();
   const [identNumber, setIdentNumber] = useState<string>();
-  const [connState, setConnState] = useState<
-    "Not connected" | "Waiting for request"
-  >("Not connected");
 
-  const { toast } = useToast();
-
-  function copyIdentCode() {
-    if (identNumber) {
-      navigator.clipboard.writeText(identNumber);
-      toast({ title: "Ident Code kopiert!", duration: 2000 });
-    }
-  }
-
-  function submitForm(event: React.SyntheticEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const code = (event.target as any).otp.value;
-    console.log(code);
-    const conn = peerRef.current?.connect(code, { reliable: true });
-    console.log(conn);
-    conn?.on("open", () => {
-      conn.send("Hallo Welt!");
-    });
-  }
+  const [peers, setPeers] = useState([] as PeerEntity[]);
 
   useEffect(() => {
     if (!peerRef.current) {
@@ -63,11 +43,11 @@ function App() {
     peerRef.current.on("open", (id) => {
       console.log("Peer ID:", id);
       setIdentNumber(id);
-      setConnState("Waiting for request");
     });
 
     peerRef.current.on("connection", (dataConnection: DataConnection) => {
-      console.log("New data connection from:", dataConnection.peer);
+      addDataConnectionListener(setPeers, dataConnection);
+
       dataConnection.on("data", (data) => {
         console.log(data);
       });
@@ -81,98 +61,37 @@ function App() {
     return () => {
       if (peerRef.current) {
         peerRef.current.destroy();
-        peerRef.current = null;
+        peerRef.current = undefined;
         console.log("Peer destroyed");
       }
     };
   }, []); // Nur einmal ausführen
 
   return (
-    <div>
-      <Toaster />
-      <Card></Card>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-          <div className="rounded-xl">
-            <Card>
-              <CardHeader>
-                <CardTitle>Global Drop</CardTitle>
-                <CardDescription>
-                  Teile Dateien und Dokumente einfach über das Netzwerk!
-                </CardDescription>
-              </CardHeader>
-              <CardContent></CardContent>
-              <CardFooter className="flex justify-between"></CardFooter>
-            </Card>
-          </div>
-          <div className="rounded-xl">
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  Ident Code - <Badge>{connState}</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-center">
-                  <InputOTP maxLength={6} value={identNumber} readOnly>
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                    </InputOTPGroup>
-                    <InputOTPSeparator />
-                    <InputOTPGroup>
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
-                  <Button onClick={copyIdentCode}>
-                    <Copy />
-                  </Button>
+    <div className="h-screen">
+      <div className="grid grid-cols-3 auto-cols-min gap-4 h-screen">
+        <div className="bg-gray-800 grid grid-rows-2 gap-4">
+          <Card>
+            <CardHeader>
+              <div className="flex flex-row items-center gap-4">
+                <div className="flex aspect-square items-center justify-center rounded-lg size-8 bg-primary text-primary-foreground">
+                  <GalleryVerticalEnd className="size-4" />
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="rounded-xl">
-            <Card>
-              <CardHeader>
-                <CardTitle>Verbinden</CardTitle>
-                <CardDescription>
-                  Verbinde dich zu einer anderen Person mit dem Ident Code
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form
-                  ref={formRef}
-                  className="flex justify-center"
-                  onSubmit={submitForm}
-                >
-                  <InputOTP
-                    maxLength={6}
-                    onComplete={() => buttonRef.current?.focus()}
-                    autoFocus
-                    name="otp"
-                  >
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                    </InputOTPGroup>
-                    <InputOTPSeparator />
-                    <InputOTPGroup>
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
-                  <Button ref={buttonRef}>Submit</Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
+                <p className="text-3xl">GlobalDrop</p>
+              </div>
+              <Separator></Separator>
+            </CardHeader>
+            <CardContent className="flex w-full items-center justify-center ">
+              <IdentShow ident={identNumber}></IdentShow>
+            </CardContent>
+          </Card>
+          <ConnectionCard
+            peerRef={peerRef}
+            peers={peers}
+            setPeers={setPeers}
+          ></ConnectionCard>
         </div>
-        <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+        <div className="col-span-2 bg-yellow-950">{peers.toString()}</div>
       </div>
     </div>
   );
