@@ -6,14 +6,23 @@ import IdentShow from "./components/ident-show";
 import { Separator } from "./components/ui/separator";
 import { ConnectionCard } from "./components/connection-card";
 import { PeerEntity } from "./lib/Peer";
-import { addDataConnectionListener } from "./lib/utils";
+import { addDataConnectionListener, TransferStatus } from "./lib/utils";
 import { startSendingFiles } from "./lib/network";
+import ProgressDialog, {
+  FileProgress,
+} from "./components/dialog/progress-dialog";
 
 function App() {
   const peerRef = useRef<Peer>();
   const [identNumber, setIdentNumber] = useState<string>();
-
   const [peers, setPeers] = useState([] as PeerEntity[]);
+
+  const [transferStatus, setTransferStatus] = useState(
+    "Done" as TransferStatus
+  );
+  const [fileProgressList, setFileProgressList] = useState([
+    {} as FileProgress,
+  ]);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -32,7 +41,12 @@ function App() {
     });
 
     peerRef.current.on("connection", (dataConnection: DataConnection) => {
-      addDataConnectionListener(setPeers, dataConnection);
+      addDataConnectionListener(
+        setPeers,
+        dataConnection,
+        setTransferStatus,
+        setFileProgressList
+      );
     });
 
     peerRef.current.on("error", (err) => {
@@ -50,13 +64,15 @@ function App() {
   }, []);
 
   function onFilesSelected(event: ChangeEvent<HTMLInputElement>): void {
-    console.log(event);
-    console.log(event.target.files);
-    startSendingFiles(event, peerRef);
+    startSendingFiles(event, peerRef, setTransferStatus, setFileProgressList);
   }
 
   return (
     <div className="h-screen">
+      <ProgressDialog
+        status={transferStatus}
+        fileProgressList={fileProgressList}
+      ></ProgressDialog>
       <div className="grid grid-cols-3 auto-cols-min gap-4 h-screen">
         <div className="bg-gray-800 grid grid-rows-2 gap-4">
           <Card>

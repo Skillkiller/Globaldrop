@@ -1,6 +1,9 @@
+import { FileProgress } from "@/components/dialog/progress-dialog";
 import { toast } from "@/hooks/use-toast";
 import Peer, { DataConnection } from "peerjs";
 import { ChangeEvent } from "react";
+import { setTimeout } from "timers";
+import { fileMetaDataListToProgressList } from "./utils";
 
 export interface PeerMessage {
   type: "Metadata" | "Chunk";
@@ -23,7 +26,9 @@ export interface FileMetadata {
 
 export function startSendingFiles(
   event: ChangeEvent<HTMLInputElement>,
-  peerRef: React.MutableRefObject<Peer | undefined>
+  peerRef: React.MutableRefObject<Peer | undefined>,
+  setTransferStatus: React.Dispatch<React.SetStateAction<"Done" | "Working">>,
+  setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>
 ) {
   const targetIdentCode = event.target.getAttribute("target-ident-code");
   const targetConnectionId = event.target.getAttribute("target-connection-id");
@@ -46,13 +51,22 @@ export function startSendingFiles(
   }
 
   const dataConnection = connection as DataConnection;
-  sendFileMetadataList(dataConnection, event.target.files!);
+  sendFileMetadataList(
+    dataConnection,
+    event.target.files!,
+    setTransferStatus,
+    setFileProgressList
+  );
+
+  // TODO Start upload
 }
 
 function sendFileMetadataList(
   dataConnection: DataConnection,
-  fileList: FileList
-) {
+  fileList: FileList,
+  setTransferStatus: React.Dispatch<React.SetStateAction<"Done" | "Working">>,
+  setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>
+): FileProgress[] {
   let list = [] as FileMetadata[];
   for (let index = 0; index < fileList.length; index++) {
     const file = fileList.item(index)!;
@@ -67,4 +81,8 @@ function sendFileMetadataList(
     files: list,
   } as PeerMessageMetadata;
   dataConnection.send(metadata);
+  let progressList = fileMetaDataListToProgressList(metadata.files);
+  setFileProgressList(progressList);
+  setTransferStatus("Working");
+  return progressList;
 }
