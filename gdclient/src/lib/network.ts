@@ -3,6 +3,7 @@ import { toast } from "@/hooks/use-toast";
 import Peer, { DataConnection } from "peerjs";
 import { ChangeEvent } from "react";
 import { fileMetaDataListToProgressList } from "./utils";
+import FileChunker from "./FileChunker";
 
 export interface PeerMessage {
   type: "Metadata" | "Chunk";
@@ -13,8 +14,10 @@ export interface PeerMessageMetadata extends PeerMessage {
 }
 
 export interface PeerMessageChunk extends PeerMessage {
-  chunk: Blob;
+  fileId: string;
+  chunk: ArrayBuffer;
   chunkNumber: number;
+  totalChunks: number;
 }
 
 export interface FileMetadata {
@@ -50,7 +53,7 @@ export function startSendingFiles(
   }
 
   const dataConnection = connection as DataConnection;
-  sendFileMetadataList(
+  let progress = sendFileMetadataList(
     dataConnection,
     event.target.files!,
     setTransferStatus,
@@ -58,6 +61,38 @@ export function startSendingFiles(
   );
 
   // TODO Start upload
+  for (let index = 0; index < event.target.files!.length; index++) {
+    const file = event.target.files!.item(index)!;
+    const chunker = new FileChunker(file, 1024);
+
+    console.log("Total chunks:", chunker.info());
+    chunker.start((data, chunkIndex) => {
+      dataConnection.send({
+        fileId: progress[index].id,
+        chunk: data,
+        chunkNumber: chunkIndex,
+        totalChunks: chunker.info(),
+        type: "Chunk",
+      } as PeerMessageChunk);
+
+      setFileProgressList((progressList) => {
+        const fileProgress = {
+          ...progressList[index],
+          chunksReceived: chunkIndex + 1,
+          totalChunks: chunker.info(),
+        } as FileProgress;
+
+        let tmp = [] as FileProgress[];
+
+        progressList.forEach((element, index2) => {
+          if (index === index2) tmp.push(fileProgress);
+          else tmp.push(element);
+        });
+
+        return tmp;
+      });
+    });
+  }
 }
 
 function sendFileMetadataList(

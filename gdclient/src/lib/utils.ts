@@ -62,6 +62,8 @@ function onData(
     const progress = fileMetaDataListToProgressList(metadata.files);
     setFileProgressList(progress);
     setTransferStatus("Working");
+  } else {
+    console.log(data);
   }
 }
 
