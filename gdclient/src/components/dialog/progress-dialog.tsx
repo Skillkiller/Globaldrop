@@ -2,14 +2,10 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { DialogClose } from "@radix-ui/react-dialog";
-import { Badge } from "../ui/badge";
 import { Progress } from "../ui/progress";
 import { TransferStatus } from "@/lib/utils";
 import { useEffect, useState } from "react";

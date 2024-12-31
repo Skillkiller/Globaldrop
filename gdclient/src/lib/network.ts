@@ -2,7 +2,6 @@ import { FileProgress } from "@/components/dialog/progress-dialog";
 import { toast } from "@/hooks/use-toast";
 import Peer, { DataConnection } from "peerjs";
 import { ChangeEvent } from "react";
-import { setTimeout } from "timers";
 import { fileMetaDataListToProgressList } from "./utils";
 
 export interface PeerMessage {
