@@ -10,16 +10,18 @@ import {
 import { useEffect, useRef, useState } from "react";
 import Peer from "peerjs";
 import { PeerEntity } from "@/lib/Peer";
-import { addDataConnectionListener } from "@/lib/utils";
+import { addDataConnectionListener, openFileDialog } from "@/lib/utils";
 
 export function ConnectionCard({
   peerRef,
   peers,
+  inputElementRef,
   setPeers,
   connectIdent,
 }: {
   peerRef: React.MutableRefObject<Peer | undefined>;
   peers: PeerEntity[];
+  inputElementRef: React.RefObject<HTMLInputElement>;
   setPeers: React.Dispatch<React.SetStateAction<PeerEntity[]>>;
   connectIdent?: string;
 }) {
@@ -34,7 +36,7 @@ export function ConnectionCard({
     const conn = peerRef.current?.connect(code, { reliable: true });
     console.log(conn);
     conn?.on("open", () => {
-      conn.send("Hallo Welt!");
+      openFileDialog(inputElementRef, conn.peer, conn.connectionId);
     });
 
     addDataConnectionListener(setPeers, conn!);

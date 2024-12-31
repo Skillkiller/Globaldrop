@@ -1,35 +1,21 @@
-import { useRef, useEffect, useState, FormEventHandler } from "react";
+import { useRef, useEffect, useState, ChangeEvent } from "react";
 import Peer, { DataConnection } from "peerjs";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "./components/ui/card";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-  InputOTPSeparator,
-} from "./components/ui/input-otp";
-import { Button } from "./components/ui/button";
-import { Copy, GalleryVerticalEnd, Unplug } from "lucide-react";
-import { Toaster } from "./components/ui/toaster";
-import { useToast } from "./hooks/use-toast";
-import { Badge } from "./components/ui/badge";
+import { Card, CardContent, CardHeader } from "./components/ui/card";
+import { GalleryVerticalEnd } from "lucide-react";
 import IdentShow from "./components/ident-show";
 import { Separator } from "./components/ui/separator";
 import { ConnectionCard } from "./components/connection-card";
 import { PeerEntity } from "./lib/Peer";
 import { addDataConnectionListener } from "./lib/utils";
+import { startSendingFiles } from "./lib/network";
 
 function App() {
   const peerRef = useRef<Peer>();
   const [identNumber, setIdentNumber] = useState<string>();
 
   const [peers, setPeers] = useState([] as PeerEntity[]);
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!peerRef.current) {
@@ -47,10 +33,6 @@ function App() {
 
     peerRef.current.on("connection", (dataConnection: DataConnection) => {
       addDataConnectionListener(setPeers, dataConnection);
-
-      dataConnection.on("data", (data) => {
-        console.log(data);
-      });
     });
 
     peerRef.current.on("error", (err) => {
@@ -65,7 +47,13 @@ function App() {
         console.log("Peer destroyed");
       }
     };
-  }, []); // Nur einmal ausführen
+  }, []);
+
+  function onFilesSelected(event: ChangeEvent<HTMLInputElement>): void {
+    console.log(event);
+    console.log(event.target.files);
+    startSendingFiles(event, peerRef);
+  }
 
   return (
     <div className="h-screen">
@@ -89,10 +77,18 @@ function App() {
             peerRef={peerRef}
             peers={peers}
             setPeers={setPeers}
+            inputElementRef={inputRef}
           ></ConnectionCard>
         </div>
         <div className="col-span-2 bg-yellow-950">{peers.toString()}</div>
       </div>
+      <input
+        type="file"
+        multiple
+        style={{ display: "none" }}
+        ref={inputRef}
+        onChange={onFilesSelected}
+      ></input>
     </div>
   );
 }
