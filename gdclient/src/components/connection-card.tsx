@@ -18,7 +18,6 @@ export function ConnectionCard({
   peers,
   inputElementRef,
   setPeers,
-  setTransferStatus,
   setFileProgressList,
   connectIdent,
 }: {
@@ -26,7 +25,6 @@ export function ConnectionCard({
   peers: PeerEntity[];
   inputElementRef: React.RefObject<HTMLInputElement>;
   setPeers: React.Dispatch<React.SetStateAction<PeerEntity[]>>;
-  setTransferStatus: React.Dispatch<React.SetStateAction<"Done" | "Working">>;
   setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>;
   connectIdent?: string;
 }) {
@@ -44,12 +42,7 @@ export function ConnectionCard({
       openFileDialog(inputElementRef, conn.peer, conn.connectionId);
     });
 
-    addDataConnectionListener(
-      setPeers,
-      conn!,
-      setTransferStatus,
-      setFileProgressList
-    );
+    addDataConnectionListener(setPeers, conn!, setFileProgressList);
   }
 
   if (connectIdent) {

@@ -39,20 +39,16 @@ export function fileMetaDataListToProgressList(
 export function addDataConnectionListener(
   setPeers: React.Dispatch<React.SetStateAction<PeerEntity[]>>,
   dataConnection: DataConnection,
-  setTransferStatus: React.Dispatch<React.SetStateAction<"Done" | "Working">>,
   setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>
 ) {
   dataConnection.on("open", () => addPeer(setPeers, dataConnection));
   dataConnection.on("close", () => removePeer(setPeers, dataConnection));
 
-  dataConnection.on("data", (data) =>
-    onData(data, setTransferStatus, setFileProgressList)
-  );
+  dataConnection.on("data", (data) => onData(data, setFileProgressList));
 }
 
 function onData(
   data: any,
-  setTransferStatus: React.Dispatch<React.SetStateAction<"Done" | "Working">>,
   setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>
 ) {
   const message = data as PeerMessage;
@@ -61,7 +57,6 @@ function onData(
     const metadata = message as PeerMessageMetadata;
     const progress = fileMetaDataListToProgressList(metadata.files);
     setFileProgressList(progress);
-    setTransferStatus("Working");
   } else {
     console.log(data);
   }

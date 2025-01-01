@@ -6,7 +6,7 @@ import IdentShow from "./components/ident-show";
 import { Separator } from "./components/ui/separator";
 import { ConnectionCard } from "./components/connection-card";
 import { PeerEntity } from "./lib/Peer";
-import { addDataConnectionListener, TransferStatus } from "./lib/utils";
+import { addDataConnectionListener } from "./lib/utils";
 import { startSendingFiles } from "./lib/network";
 import ProgressDialog, {
   FileProgress,
@@ -16,13 +16,9 @@ function App() {
   const peerRef = useRef<Peer>();
   const [identNumber, setIdentNumber] = useState<string>();
   const [peers, setPeers] = useState([] as PeerEntity[]);
-
-  const [transferStatus, setTransferStatus] = useState(
-    "Done" as TransferStatus
+  const [fileProgressList, setFileProgressList] = useState(
+    [] as FileProgress[]
   );
-  const [fileProgressList, setFileProgressList] = useState([
-    {} as FileProgress,
-  ]);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -41,12 +37,7 @@ function App() {
     });
 
     peerRef.current.on("connection", (dataConnection: DataConnection) => {
-      addDataConnectionListener(
-        setPeers,
-        dataConnection,
-        setTransferStatus,
-        setFileProgressList
-      );
+      addDataConnectionListener(setPeers, dataConnection, setFileProgressList);
     });
 
     peerRef.current.on("error", (err) => {
@@ -64,17 +55,13 @@ function App() {
   }, []);
 
   function onFilesSelected(event: ChangeEvent<HTMLInputElement>): void {
-    startSendingFiles(event, peerRef, setTransferStatus, setFileProgressList);
+    startSendingFiles(event, peerRef, setFileProgressList);
   }
 
   return (
     <div className="h-screen">
-      <ProgressDialog
-        status={transferStatus}
-        fileProgressList={fileProgressList}
-      ></ProgressDialog>
       <div className="grid grid-cols-3 auto-cols-min gap-4 h-screen">
-        <div className="bg-gray-800 grid grid-rows-2 gap-4">
+        <div className="bg-gray-800 grid grid-rows-3 gap-4">
           <Card>
             <CardHeader>
               <div className="flex flex-row items-center gap-4">
@@ -94,9 +81,13 @@ function App() {
             peers={peers}
             setPeers={setPeers}
             inputElementRef={inputRef}
-            setTransferStatus={setTransferStatus}
             setFileProgressList={setFileProgressList}
           ></ConnectionCard>
+          <div className="w-full">
+            <ProgressDialog
+              fileProgressList={fileProgressList}
+            ></ProgressDialog>
+          </div>
         </div>
         <div className="col-span-2 bg-yellow-950">{peers.toString()}</div>
       </div>

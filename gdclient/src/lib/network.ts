@@ -29,7 +29,6 @@ export interface FileMetadata {
 export function startSendingFiles(
   event: ChangeEvent<HTMLInputElement>,
   peerRef: React.MutableRefObject<Peer | undefined>,
-  setTransferStatus: React.Dispatch<React.SetStateAction<"Done" | "Working">>,
   setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>
 ) {
   const targetIdentCode = event.target.getAttribute("target-ident-code");
@@ -56,7 +55,6 @@ export function startSendingFiles(
   let progress = sendFileMetadataList(
     dataConnection,
     event.target.files!,
-    setTransferStatus,
     setFileProgressList
   );
 
@@ -98,7 +96,6 @@ export function startSendingFiles(
 function sendFileMetadataList(
   dataConnection: DataConnection,
   fileList: FileList,
-  setTransferStatus: React.Dispatch<React.SetStateAction<"Done" | "Working">>,
   setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>
 ): FileProgress[] {
   let list = [] as FileMetadata[];
@@ -117,6 +114,5 @@ function sendFileMetadataList(
   dataConnection.send(metadata);
   let progressList = fileMetaDataListToProgressList(metadata.files);
   setFileProgressList(progressList);
-  setTransferStatus("Working");
   return progressList;
 }
