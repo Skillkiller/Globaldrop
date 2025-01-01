@@ -68,7 +68,7 @@ export function ConnectionCard({
           <div className="flex flex-col space-y-4 items-center max-w-[280px]">
             <form
               ref={formRef}
-              className="flex justify-center"
+              className="flex justify-center gap-2"
               onSubmit={submitForm}
             >
               <InputOTP
@@ -92,8 +92,7 @@ export function ConnectionCard({
                 className="w-full max-w-[280px]"
                 disabled={!connectButtonEnabled}
               >
-                <Link className="mr-2 h-4 w-4" />
-                Verbinden
+                <Link />
               </Button>
             </form>
           </div>
