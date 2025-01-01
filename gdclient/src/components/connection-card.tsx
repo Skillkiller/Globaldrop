@@ -11,18 +11,23 @@ import { useEffect, useRef, useState } from "react";
 import Peer from "peerjs";
 import { PeerEntity } from "@/lib/Peer";
 import { addDataConnectionListener, openFileDialog } from "@/lib/utils";
+import { FileProgress } from "./dialog/progress-dialog";
 
 export function ConnectionCard({
   peerRef,
   peers,
   inputElementRef,
   setPeers,
+  setTransferStatus,
+  setFileProgressList,
   connectIdent,
 }: {
   peerRef: React.MutableRefObject<Peer | undefined>;
   peers: PeerEntity[];
   inputElementRef: React.RefObject<HTMLInputElement>;
   setPeers: React.Dispatch<React.SetStateAction<PeerEntity[]>>;
+  setTransferStatus: React.Dispatch<React.SetStateAction<"Done" | "Working">>;
+  setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>;
   connectIdent?: string;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -39,7 +44,12 @@ export function ConnectionCard({
       openFileDialog(inputElementRef, conn.peer, conn.connectionId);
     });
 
-    addDataConnectionListener(setPeers, conn!);
+    addDataConnectionListener(
+      setPeers,
+      conn!,
+      setTransferStatus,
+      setFileProgressList
+    );
   }
 
   if (connectIdent) {

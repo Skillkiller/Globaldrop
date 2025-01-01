@@ -94,6 +94,8 @@ function App() {
             peers={peers}
             setPeers={setPeers}
             inputElementRef={inputRef}
+            setTransferStatus={setTransferStatus}
+            setFileProgressList={setFileProgressList}
           ></ConnectionCard>
         </div>
         <div className="col-span-2 bg-yellow-950">{peers.toString()}</div>
