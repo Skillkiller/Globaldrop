@@ -11,6 +11,7 @@ import { startSendingFiles } from "./lib/network";
 import ProgressDialog, {
   FileProgress,
 } from "./components/dialog/progress-dialog";
+import PeerDisplay from "./components/PeerDisplay";
 
 function App() {
   const peerRef = useRef<Peer>();
@@ -89,7 +90,9 @@ function App() {
             ></ProgressDialog>
           </div>
         </div>
-        <div className="col-span-2 bg-yellow-950">{peers.toString()}</div>
+        <div className="col-span-2">
+          <PeerDisplay peers={peers} inputElementRef={inputRef}></PeerDisplay>
+        </div>
       </div>
       <input
         type="file"
