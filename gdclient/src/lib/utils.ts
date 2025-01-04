@@ -5,7 +5,11 @@ import { DataConnection } from "peerjs";
 import { FileMetadata, PeerMessage } from "./network";
 import { FileProgress } from "@/components/dialog/progress-dialog";
 
-import type { PeerMessageChunk, PeerMessageMetadata } from "./network";
+import type {
+  PeerMessageChunk,
+  PeerMessageChunkReceived,
+  PeerMessageMetadata,
+} from "./network";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -46,12 +50,13 @@ export function addDataConnectionListener(
   dataConnection.on("close", () => removePeer(setPeers, dataConnection));
 
   dataConnection.on("data", (data) =>
-    onData(data, setFileProgressList, openFileProgressDialog)
+    onData(data, dataConnection, setFileProgressList, openFileProgressDialog)
   );
 }
 
 function onData(
   data: any,
+  dataConnection: DataConnection,
   setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>,
   openFileProgressDialog: () => void
 ) {
@@ -79,6 +84,36 @@ function onData(
         const progress: FileProgress = {
           ...oldProgress,
           chunksReceived: chunkMessage.chunkNumber + 1,
+        };
+
+        const chunkReceivedMessage: PeerMessageChunkReceived = {
+          type: "ChunkReceived",
+          fileId: chunkMessage.fileId,
+          chunkNumber: chunkMessage.chunkNumber,
+        };
+        dataConnection.send(chunkReceivedMessage);
+
+        return oldList.map((p) => {
+          if (p.id === progress.id) return progress;
+          return p;
+        });
+      } else {
+        return oldList;
+      }
+    });
+  } else if (message.type === "ChunkReceived") {
+    console.log(message);
+    const chunkReceivedMessage = message as PeerMessageChunkReceived;
+    // Update progress bar and save chunk
+    setFileProgressList((oldList) => {
+      // Search old progress item
+      const oldProgress = oldList.find(
+        (p) => p.id === chunkReceivedMessage.fileId
+      );
+      if (oldProgress) {
+        const progress: FileProgress = {
+          ...oldProgress,
+          chunksReceived: chunkReceivedMessage.chunkNumber + 1,
         };
         return oldList.map((p) => {
           if (p.id === progress.id) return progress;

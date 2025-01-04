@@ -5,7 +5,7 @@ import { ChangeEvent } from "react";
 import FileChunker from "./FileChunker";
 
 export interface PeerMessage {
-  type: "Metadata" | "Chunk";
+  type: "Metadata" | "Chunk" | "ChunkReceived";
 }
 
 export interface PeerMessageMetadata extends PeerMessage, FileMetadata {}
@@ -14,6 +14,11 @@ export interface PeerMessageChunk extends PeerMessage {
   fileId: string;
   chunkNumber: number;
   chunk: ArrayBuffer;
+}
+
+export interface PeerMessageChunkReceived extends PeerMessage {
+  fileId: string;
+  chunkNumber: number;
 }
 
 export interface FileMetadata {
@@ -27,8 +32,7 @@ export interface FileMetadata {
 function startSendingSingleFile(
   fileId: string,
   chunker: FileChunker,
-  dataConnection: DataConnection,
-  setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>
+  dataConnection: DataConnection
 ) {
   chunker.start((data, chunkIndex) => {
     dataConnection.send({
@@ -37,22 +41,6 @@ function startSendingSingleFile(
       chunkNumber: chunkIndex,
       type: "Chunk",
     } as PeerMessageChunk);
-
-    setFileProgressList((progressList) => {
-      const oldProgress = progressList.find((p) => p.id === fileId);
-      if (oldProgress) {
-        const progress = {
-          ...oldProgress,
-          chunksReceived: chunkIndex + 1,
-        } as FileProgress;
-
-        return progressList.map((oldElement) => {
-          if (oldElement.id === fileId) return progress;
-          return oldElement;
-        });
-      }
-      return progressList;
-    });
   });
 }
 
@@ -96,12 +84,7 @@ export function startSendingFiles(
         buffer: [],
       })
     );
-    startSendingSingleFile(
-      metadata.id,
-      chunker,
-      dataConnection,
-      setFileProgressList
-    );
+    startSendingSingleFile(metadata.id, chunker, dataConnection);
   }
 }
 
