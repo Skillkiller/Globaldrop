@@ -2,34 +2,65 @@ import { FileProgress } from "@/components/dialog/progress-dialog";
 import { toast } from "@/hooks/use-toast";
 import Peer, { DataConnection } from "peerjs";
 import { ChangeEvent } from "react";
-import { fileMetaDataListToProgressList } from "./utils";
 import FileChunker from "./FileChunker";
 
 export interface PeerMessage {
   type: "Metadata" | "Chunk";
 }
 
-export interface PeerMessageMetadata extends PeerMessage {
-  files: FileMetadata[];
-}
+export interface PeerMessageMetadata extends PeerMessage, FileMetadata {}
 
 export interface PeerMessageChunk extends PeerMessage {
   fileId: string;
-  chunk: ArrayBuffer;
   chunkNumber: number;
-  totalChunks: number;
+  chunk: ArrayBuffer;
 }
 
 export interface FileMetadata {
   id: string;
   name: string;
   size: number;
+  mime: string;
+  totalChunks: number;
+}
+
+function startSendingSingleFile(
+  fileId: string,
+  chunker: FileChunker,
+  dataConnection: DataConnection,
+  setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>
+) {
+  chunker.start((data, chunkIndex) => {
+    dataConnection.send({
+      fileId: fileId,
+      chunk: data,
+      chunkNumber: chunkIndex,
+      type: "Chunk",
+    } as PeerMessageChunk);
+
+    setFileProgressList((progressList) => {
+      const oldProgress = progressList.find((p) => p.id === fileId);
+      if (oldProgress) {
+        const progress = {
+          ...oldProgress,
+          chunksReceived: chunkIndex + 1,
+        } as FileProgress;
+
+        return progressList.map((oldElement) => {
+          if (oldElement.id === fileId) return progress;
+          return oldElement;
+        });
+      }
+      return progressList;
+    });
+  });
 }
 
 export function startSendingFiles(
   event: ChangeEvent<HTMLInputElement>,
   peerRef: React.MutableRefObject<Peer | undefined>,
-  setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>
+  setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>,
+  openFileProgressDialog: () => void
 ) {
   const targetIdentCode = event.target.getAttribute("target-ident-code");
   const targetConnectionId = event.target.getAttribute("target-connection-id");
@@ -52,67 +83,44 @@ export function startSendingFiles(
   }
 
   const dataConnection = connection as DataConnection;
-  let progress = sendFileMetadataList(
-    dataConnection,
-    event.target.files!,
-    setFileProgressList
-  );
-
-  // TODO Start upload
+  openFileProgressDialog();
   for (let index = 0; index < event.target.files!.length; index++) {
     const file = event.target.files!.item(index)!;
-    const chunker = new FileChunker(file, 1024);
-
-    console.log("Total chunks:", chunker.info());
-    chunker.start((data, chunkIndex) => {
-      dataConnection.send({
-        fileId: progress[index].id,
-        chunk: data,
-        chunkNumber: chunkIndex,
-        totalChunks: chunker.info(),
-        type: "Chunk",
-      } as PeerMessageChunk);
-
-      setFileProgressList((progressList) => {
-        const fileProgress = {
-          ...progressList[index],
-          chunksReceived: chunkIndex + 1,
-          totalChunks: chunker.info(),
-        } as FileProgress;
-
-        let tmp = [] as FileProgress[];
-
-        progressList.forEach((element, index2) => {
-          if (index === index2) tmp.push(fileProgress);
-          else tmp.push(element);
-        });
-
-        return tmp;
-      });
-    });
+    const chunker = new FileChunker(file, 1024 * 1024 * 5);
+    const metadata = sendFileMetadata(dataConnection, file, chunker.info());
+    setFileProgressList((oldList) =>
+      oldList.concat({
+        ...metadata,
+        chunksReceived: 0,
+        mode: "Sender",
+        buffer: [],
+      })
+    );
+    startSendingSingleFile(
+      metadata.id,
+      chunker,
+      dataConnection,
+      setFileProgressList
+    );
   }
 }
 
-function sendFileMetadataList(
+function sendFileMetadata(
   dataConnection: DataConnection,
-  fileList: FileList,
-  setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>
-): FileProgress[] {
-  let list = [] as FileMetadata[];
-  for (let index = 0; index < fileList.length; index++) {
-    const file = fileList.item(index)!;
-    list.push({
-      id: crypto.randomUUID(),
-      name: file.name,
-      size: file.size,
-    });
-  }
-  let metadata = {
+  file: File,
+  totalChunks: number
+): FileMetadata {
+  const fileProgress: FileMetadata = {
+    id: crypto.randomUUID(),
+    name: file.name,
+    size: file.size,
+    mime: file.type,
+    totalChunks: totalChunks,
+  };
+  dataConnection.send({
     type: "Metadata",
-    files: list,
-  } as PeerMessageMetadata;
-  dataConnection.send(metadata);
-  let progressList = fileMetaDataListToProgressList(metadata.files);
-  setFileProgressList(progressList);
-  return progressList;
+    ...fileProgress,
+  } as PeerMessageMetadata);
+
+  return fileProgress;
 }

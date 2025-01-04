@@ -23,6 +23,14 @@ function App() {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const dialogRef = useRef<HTMLButtonElement | null>();
+
+  const openFileProgressDialog = () => {
+    console.log("Öffne Dialog");
+    console.log(dialogRef.current);
+    if (dialogRef.current) dialogRef.current.click();
+  };
+
   useEffect(() => {
     if (!peerRef.current) {
       console.log("Initializing Peer");
@@ -38,7 +46,12 @@ function App() {
     });
 
     peerRef.current.on("connection", (dataConnection: DataConnection) => {
-      addDataConnectionListener(setPeers, dataConnection, setFileProgressList);
+      addDataConnectionListener(
+        setPeers,
+        dataConnection,
+        setFileProgressList,
+        openFileProgressDialog
+      );
     });
 
     peerRef.current.on("error", (err) => {
@@ -56,7 +69,12 @@ function App() {
   }, []);
 
   function onFilesSelected(event: ChangeEvent<HTMLInputElement>): void {
-    startSendingFiles(event, peerRef, setFileProgressList);
+    startSendingFiles(
+      event,
+      peerRef,
+      setFileProgressList,
+      openFileProgressDialog
+    );
   }
 
   return (
@@ -83,10 +101,12 @@ function App() {
             setPeers={setPeers}
             inputElementRef={inputRef}
             setFileProgressList={setFileProgressList}
+            openFileProgressDialog={openFileProgressDialog}
           ></ConnectionCard>
           <div className="w-full">
             <ProgressDialog
               fileProgressList={fileProgressList}
+              ref={dialogRef}
             ></ProgressDialog>
           </div>
         </div>

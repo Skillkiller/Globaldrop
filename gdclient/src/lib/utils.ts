@@ -5,7 +5,7 @@ import { DataConnection } from "peerjs";
 import { FileMetadata, PeerMessage } from "./network";
 import { FileProgress } from "@/components/dialog/progress-dialog";
 
-import type { PeerMessageMetadata } from "./network";
+import type { PeerMessageChunk, PeerMessageMetadata } from "./network";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -39,26 +39,55 @@ export function fileMetaDataListToProgressList(
 export function addDataConnectionListener(
   setPeers: React.Dispatch<React.SetStateAction<PeerEntity[]>>,
   dataConnection: DataConnection,
-  setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>
+  setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>,
+  openFileProgressDialog: () => void
 ) {
   dataConnection.on("open", () => addPeer(setPeers, dataConnection));
   dataConnection.on("close", () => removePeer(setPeers, dataConnection));
 
-  dataConnection.on("data", (data) => onData(data, setFileProgressList));
+  dataConnection.on("data", (data) =>
+    onData(data, setFileProgressList, openFileProgressDialog)
+  );
 }
 
 function onData(
   data: any,
-  setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>
+  setFileProgressList: React.Dispatch<React.SetStateAction<FileProgress[]>>,
+  openFileProgressDialog: () => void
 ) {
   const message = data as PeerMessage;
 
   if (message.type === "Metadata") {
     const metadata = message as PeerMessageMetadata;
-    const progress = fileMetaDataListToProgressList(metadata.files);
-    setFileProgressList(progress);
-  } else {
-    console.log(data);
+    setFileProgressList((oldList) =>
+      oldList.concat({
+        ...metadata,
+        buffer: [],
+        chunksReceived: 0,
+        mode: "Receiver",
+      })
+    );
+    openFileProgressDialog();
+  } else if (message.type === "Chunk") {
+    const chunkMessage = message as PeerMessageChunk;
+    // Update progress bar and save chunk
+    setFileProgressList((oldList) => {
+      // Search old progress item
+      const oldProgress = oldList.find((p) => p.id === chunkMessage.fileId);
+      if (oldProgress) {
+        oldProgress.buffer.push(chunkMessage.chunk);
+        const progress: FileProgress = {
+          ...oldProgress,
+          chunksReceived: chunkMessage.chunkNumber + 1,
+        };
+        return oldList.map((p) => {
+          if (p.id === progress.id) return progress;
+          return p;
+        });
+      } else {
+        return oldList;
+      }
+    });
   }
 }
 
