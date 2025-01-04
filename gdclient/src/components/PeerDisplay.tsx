@@ -15,7 +15,7 @@ export default function PeerDisplay({
   }
 
   return (
-    <div className="flex items-center justify-center h-full bg-secondary">
+    <div className="flex items-center justify-center h-full">
       <div className="flex flex-wrap justify-center gap-12">
         {peers.map((peer) => (
           <div

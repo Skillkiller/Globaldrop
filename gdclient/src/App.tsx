@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, ChangeEvent } from "react";
 import Peer, { DataConnection } from "peerjs";
-import { Card, CardContent, CardHeader } from "./components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { GalleryVerticalEnd } from "lucide-react";
 import IdentShow from "./components/ident-show";
 import { Separator } from "./components/ui/separator";
@@ -78,42 +78,44 @@ function App() {
   }
 
   return (
-    <div className="h-screen">
-      <div className="grid grid-cols-3 auto-cols-min gap-4 h-screen">
-        <div className="bg-gray-800 grid grid-rows-3 gap-4">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-row items-center gap-4">
-                <div className="flex aspect-square items-center justify-center rounded-lg size-8 bg-primary text-primary-foreground">
-                  <GalleryVerticalEnd className="size-4" />
-                </div>
-                <p className="text-3xl">GlobalDrop</p>
+    <div className="flex flex-col lg:flex-row min-h-screen">
+      {/* Sidebar */}
+      <div className="w-full lg:w-1/3 p-4 flex flex-col space-y-4">
+        <Card>
+          <CardHeader>
+            <div className="flex flex-row items-center gap-4">
+              <div className="flex aspect-square items-center justify-center rounded-lg size-8 bg-primary text-primary-foreground">
+                <GalleryVerticalEnd className="size-4" />
               </div>
-              <Separator></Separator>
-            </CardHeader>
-            <CardContent className="flex w-full items-center justify-center ">
-              <IdentShow ident={identNumber}></IdentShow>
-            </CardContent>
-          </Card>
-          <ConnectionCard
-            peerRef={peerRef}
-            peers={peers}
-            setPeers={setPeers}
-            inputElementRef={inputRef}
-            setFileProgressList={setFileProgressList}
-            openFileProgressDialog={openFileProgressDialog}
-          ></ConnectionCard>
-          <div className="w-full">
-            <ProgressDialog
-              fileProgressList={fileProgressList}
-              ref={dialogRef}
-            ></ProgressDialog>
-          </div>
-        </div>
-        <div className="col-span-2">
-          <PeerDisplay peers={peers} inputElementRef={inputRef}></PeerDisplay>
+              <p className="text-3xl">GlobalDrop</p>
+            </div>
+            <Separator></Separator>
+          </CardHeader>
+          <CardContent className="flex w-full items-center justify-center ">
+            <IdentShow ident={identNumber}></IdentShow>
+          </CardContent>
+        </Card>
+        <ConnectionCard
+          peerRef={peerRef}
+          peers={peers}
+          setPeers={setPeers}
+          inputElementRef={inputRef}
+          setFileProgressList={setFileProgressList}
+          openFileProgressDialog={openFileProgressDialog}
+        ></ConnectionCard>
+        <div className="flex-grow">
+          <ProgressDialog
+            fileProgressList={fileProgressList}
+            ref={dialogRef}
+          ></ProgressDialog>
         </div>
       </div>
+
+      {/* Main Content */}
+      <div className="flex-grow p-4">
+        <PeerDisplay peers={peers} inputElementRef={inputRef} />
+      </div>
+
       <input
         type="file"
         multiple

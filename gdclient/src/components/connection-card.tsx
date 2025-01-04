@@ -63,7 +63,7 @@ export function ConnectionCard({
   }, [peers, value]);
 
   return (
-    <Card className="w-full max-w-md h-max">
+    <Card className="w-full max-w-md">
       <CardHeader>
         <div className="flex items-center space-x-2">
           <Unplug className="h-6 w-6" />
