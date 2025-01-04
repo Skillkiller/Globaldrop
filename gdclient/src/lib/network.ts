@@ -8,15 +8,19 @@ export interface PeerMessage {
   type: "Metadata" | "Chunk" | "ChunkReceived";
 }
 
-export interface PeerMessageMetadata extends PeerMessage, FileMetadata {}
+export interface PeerMessageMetadata extends PeerMessage, FileMetadata {
+  type: "Metadata";
+}
 
 export interface PeerMessageChunk extends PeerMessage {
+  type: "Chunk";
   fileId: string;
   chunkNumber: number;
   chunk: ArrayBuffer;
 }
 
 export interface PeerMessageChunkReceived extends PeerMessage {
+  type: "ChunkReceived";
   fileId: string;
   chunkNumber: number;
 }
