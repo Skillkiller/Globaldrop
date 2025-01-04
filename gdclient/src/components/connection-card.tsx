@@ -63,7 +63,7 @@ export function ConnectionCard({
   }, [peers, value]);
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-lg">
       <CardHeader>
         <div className="flex items-center space-x-2">
           <Unplug className="h-6 w-6" />
@@ -75,7 +75,7 @@ export function ConnectionCard({
       </CardHeader>
       <CardContent>
         <div className="flex flex-col items-center space-y-4">
-          <div className="flex flex-col space-y-4 items-center max-w-[280px]">
+          <div className="flex flex-col space-y-4 items-center">
             <form
               ref={formRef}
               className="flex justify-center gap-2"
@@ -98,10 +98,7 @@ export function ConnectionCard({
                   <InputOTPSlot index={5} />
                 </InputOTPGroup>
               </InputOTP>
-              <Button
-                className="w-full max-w-[280px]"
-                disabled={!connectButtonEnabled}
-              >
+              <Button className="w-full" disabled={!connectButtonEnabled}>
                 <Link />
               </Button>
             </form>

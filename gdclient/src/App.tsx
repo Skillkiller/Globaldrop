@@ -80,7 +80,7 @@ function App() {
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Sidebar */}
-      <div className="w-full lg:w-1/3 p-4 flex flex-col space-y-4">
+      <div className="w-full max-w-lg p-4 flex flex-col space-y-4">
         <Card>
           <CardHeader>
             <div className="flex flex-row items-center gap-4">
