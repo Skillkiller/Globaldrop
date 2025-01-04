@@ -58,7 +58,9 @@ export const ProgressDialog = forwardRef(
               <React.Fragment key={f.id}>
                 <Button
                   key={f.id + "-dl-button"}
-                  variant={"outline"}
+                  variant={
+                    f.chunksReceived !== f.totalChunks ? "outline" : "default"
+                  }
                   disabled={
                     f.chunksReceived !== f.totalChunks || f.mode !== "Receiver"
                   }
