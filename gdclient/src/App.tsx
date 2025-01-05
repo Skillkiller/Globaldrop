@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, ChangeEvent } from "react";
 import Peer, { DataConnection } from "peerjs";
-import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
+import { Card, CardContent, CardHeader } from "./components/ui/card";
 import { GalleryVerticalEnd } from "lucide-react";
 import IdentShow from "./components/ident-show";
 import { Separator } from "./components/ui/separator";
