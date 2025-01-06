@@ -12,6 +12,7 @@ import ProgressDialog, {
   FileProgress,
 } from "./components/dialog/progress-dialog";
 import PeerDisplay from "./components/PeerDisplay";
+import { ThemeProvider } from "./components/theme-provider";
 
 function App() {
   const peerRef = useRef<Peer>();
@@ -78,52 +79,54 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen">
-      {/* Sidebar */}
-      <div className="w-full max-w-lg p-4 flex flex-col space-y-4">
-        <Card>
-          <CardHeader>
-            <div className="flex flex-row items-center gap-4">
-              <div className="flex aspect-square items-center justify-center rounded-lg size-8 bg-primary text-primary-foreground">
-                <GalleryVerticalEnd className="size-4" />
+    <ThemeProvider storageKey="vite-ui-theme">
+      <div className="flex flex-col lg:flex-row min-h-screen">
+        {/* Sidebar */}
+        <div className="w-full max-w-lg p-4 flex flex-col space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex flex-row items-center gap-4">
+                <div className="flex aspect-square items-center justify-center rounded-lg size-8 bg-primary text-primary-foreground">
+                  <GalleryVerticalEnd className="size-4" />
+                </div>
+                <p className="text-3xl">GlobalDrop</p>
               </div>
-              <p className="text-3xl">GlobalDrop</p>
-            </div>
-            <Separator></Separator>
-          </CardHeader>
-          <CardContent className="flex w-full items-center justify-center ">
-            <IdentShow ident={identNumber}></IdentShow>
-          </CardContent>
-        </Card>
-        <ConnectionCard
-          peerRef={peerRef}
-          peers={peers}
-          setPeers={setPeers}
-          inputElementRef={inputRef}
-          setFileProgressList={setFileProgressList}
-          openFileProgressDialog={openFileProgressDialog}
-        ></ConnectionCard>
-        <div className="flex-grow">
-          <ProgressDialog
-            fileProgressList={fileProgressList}
-            ref={dialogRef}
-          ></ProgressDialog>
+              <Separator></Separator>
+            </CardHeader>
+            <CardContent className="flex w-full items-center justify-center ">
+              <IdentShow ident={identNumber}></IdentShow>
+            </CardContent>
+          </Card>
+          <ConnectionCard
+            peerRef={peerRef}
+            peers={peers}
+            setPeers={setPeers}
+            inputElementRef={inputRef}
+            setFileProgressList={setFileProgressList}
+            openFileProgressDialog={openFileProgressDialog}
+          ></ConnectionCard>
+          <div className="flex-grow">
+            <ProgressDialog
+              fileProgressList={fileProgressList}
+              ref={dialogRef}
+            ></ProgressDialog>
+          </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="flex-grow p-4">
-        <PeerDisplay peers={peers} inputElementRef={inputRef} />
-      </div>
+        {/* Main Content */}
+        <div className="flex-grow p-4">
+          <PeerDisplay peers={peers} inputElementRef={inputRef} />
+        </div>
 
-      <input
-        type="file"
-        multiple
-        style={{ display: "none" }}
-        ref={inputRef}
-        onChange={onFilesSelected}
-      ></input>
-    </div>
+        <input
+          type="file"
+          multiple
+          style={{ display: "none" }}
+          ref={inputRef}
+          onChange={onFilesSelected}
+        ></input>
+      </div>
+    </ThemeProvider>
   );
 }
 
