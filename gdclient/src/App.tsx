@@ -158,6 +158,19 @@ function App() {
           onChange={onFilesSelected}
         ></input>
       </div>
+      <Card className="fixed bottom-2 left-1/2 transform -translate-x-1/2 z-50 w-auto max-w-[90%]">
+        <CardContent className="p-2 text-center text-sm">
+          <p>
+            Globaldrop v{APP_VERSION} -{" "}
+            <a
+              href="https://github.com/Skillkiller/Globaldrop"
+              className="underline"
+            >
+              GitHub
+            </a>
+          </p>
+        </CardContent>
+      </Card>
     </ThemeProvider>
   );
 }
