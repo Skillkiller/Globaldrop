@@ -35,9 +35,12 @@ function App() {
   useEffect(() => {
     if (!peerRef.current) {
       console.log("Initializing Peer");
-      peerRef.current = new Peer(
-        "" + (Math.floor(Math.random() * 999999) + 100_000)
-      ); // Peer wird nur einmal erstellt
+      peerRef.current = new Peer({
+        host: import.meta.env.VITE_BACKEND_HOST,
+        port: import.meta.env.VITE_BACKEND_PORT,
+        path: import.meta.env.VITE_BACKEND_PEER_PATH,
+        secure: import.meta.env.VITE_PEER_SECURE === "true",
+      }); // Peer wird nur einmal erstellt
     }
 
     // Beispiel: Event-Listener registrieren
