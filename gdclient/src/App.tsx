@@ -43,10 +43,43 @@ function App() {
       }); // Peer wird nur einmal erstellt
     }
 
+    const getRoomData = async () => {
+      const backendHost = import.meta.env.VITE_BACKEND_HOST;
+      const backendPort = import.meta.env.VITE_BACKEND_PORT;
+      const backendSecure = import.meta.env.VITE_BACKEND_SECURE === "true";
+      const backendRoomPath = import.meta.env.VITE_BACKEND_ROOM_PATH;
+
+      const protocol = backendSecure ? "https" : "http";
+      const url = `${protocol}://${backendHost}:${backendPort}/${backendRoomPath}`;
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("Fehler beim Abrufen der Room Daten!");
+        }
+        const data: string[] = await response.json();
+
+        data.forEach((ident) => {
+          const conn = peerRef.current?.connect(ident, {
+            reliable: true,
+          });
+          addDataConnectionListener(
+            setPeers,
+            conn!,
+            setFileProgressList,
+            openFileProgressDialog
+          );
+        });
+      } catch (error) {
+        console.error("Fehler bei der Anfrage:", error);
+      }
+    };
+
     // Beispiel: Event-Listener registrieren
     peerRef.current.on("open", (id) => {
       console.log("Peer ID:", id);
       setIdentNumber(id);
+      getRoomData();
     });
 
     peerRef.current.on("connection", (dataConnection: DataConnection) => {
@@ -56,10 +89,6 @@ function App() {
         setFileProgressList,
         openFileProgressDialog
       );
-    });
-
-    peerRef.current.on("error", (err) => {
-      console.log(err);
     });
 
     // Cleanup: Peer-Instanz zerstören, aber nur beim Unmount der Komponente
