@@ -10,8 +10,11 @@ interface WebSocketPlus extends WebSocket {
   room: string | null;
 }
 
+const port = process.env.PORT || 9000;
 const app = express();
-const server = app.listen(9000);
+const server = app.listen(port);
+
+console.log("Starting server on port", port);
 
 app.get("/room", (req, res) => {
   res.send(getClientsInRoom(extractIp(req)));
