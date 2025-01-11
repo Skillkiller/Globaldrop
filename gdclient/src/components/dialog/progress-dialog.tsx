@@ -53,6 +53,9 @@ export const ProgressDialog = forwardRef(
           <DialogHeader>
             <DialogTitle>Fortschritt</DialogTitle>
           </DialogHeader>
+          {fileProgressList.length === 0 && (
+            <h1>Es wurden bisher keine Daten übertragen</h1>
+          )}
           <div className="grid grid-cols-2 gap-4 justify-between items-center ">
             {fileProgressList.map((f) => (
               <React.Fragment key={f.id}>
