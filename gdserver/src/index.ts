@@ -2,6 +2,9 @@ import { Server } from "ws";
 import { IClient, ExpressPeerServer } from "peer";
 import { IncomingMessage } from "http";
 import express from "express";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 interface WebSocketPlus extends WebSocket {
   room: string | null;
