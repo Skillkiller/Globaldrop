@@ -3,6 +3,7 @@ import { IClient, ExpressPeerServer } from "peer";
 import { IncomingMessage } from "http";
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
@@ -16,9 +17,21 @@ const server = app.listen(port, () => {
   console.log(`Started server on port ${port}`);
 });
 
-app.get("/room", (req, res) => {
-  res.send(getClientsInRoom(extractIp(req)));
-});
+app.get(
+  "/room",
+  cors({
+    origin: process.env.ROOM_ORIGIN,
+    methods: "GET",
+  }),
+  (req, res) => {
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate"
+    );
+    res.send(getClientsInRoom(extractIp(req)));
+  }
+);
+
 
 const peerServer = ExpressPeerServer(server, {
   generateClientId: customIdentGeneration,
