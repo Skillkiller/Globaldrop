@@ -1,15 +1,16 @@
 {
   "name": "gdserver",
-  "version": "1.0.0",
+  "private": true,
+  "version": "0.0.0",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "watch": "tsc --watch"
   },
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "author": "Sebastian Espei <kontakt@skillkiller.de>",
+  "license": "MIT",
+  "description": "Globaldrop server project",
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/node": "^22.10.5",
