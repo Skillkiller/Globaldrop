@@ -14,6 +14,11 @@ import ProgressDialog, {
 import PeerDisplay from "./components/PeerDisplay";
 import { ThemeProvider } from "./components/theme-provider";
 
+interface RoomData {
+  name: string;
+  clients: string[];
+}
+
 function App() {
   const peerRef = useRef<Peer>();
   const [identNumber, setIdentNumber] = useState<string>();
@@ -57,9 +62,9 @@ function App() {
         if (!response.ok) {
           throw new Error("Fehler beim Abrufen der Room Daten!");
         }
-        const data: string[] = await response.json();
+        const data: RoomData = await response.json();
 
-        data.forEach((ident) => {
+        data.clients.forEach((ident) => {
           const conn = peerRef.current?.connect(ident, {
             reliable: true,
           });

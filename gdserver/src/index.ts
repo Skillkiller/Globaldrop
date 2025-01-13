@@ -1,6 +1,6 @@
 import { Server } from "ws";
 import { IClient, ExpressPeerServer } from "peer";
-import { IncomingMessage } from "http";
+import { get, IncomingMessage } from "http";
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -9,6 +9,11 @@ dotenv.config();
 
 interface WebSocketPlus extends WebSocket {
   room: string | null;
+}
+
+interface RoomData {
+  name: string;
+  clients: string[];
 }
 
 const port = process.env.PORT || 9000;
@@ -28,10 +33,14 @@ app.get(
       "Cache-Control",
       "no-store, no-cache, must-revalidate, proxy-revalidate"
     );
-    res.send(getClientsInRoom(extractIp(req)));
+    const roomData = getRoomData(extractIp(req));
+    if (roomData) {
+      res.send(roomData);
+    } else {
+      res.status(404).send("No room found!");
+    }
   }
 );
-
 
 const peerServer = ExpressPeerServer(server, {
   generateClientId: customIdentGeneration,
@@ -101,8 +110,21 @@ function quitRoom(room: string | null, client: IClient) {
   }
 }
 
-function getClientsInRoom(room: string | null): string[] {
-  if (!room || !rooms[room]) return [];
+function getRoomData(room: string | null): RoomData | null {
+  if (room) {
+    const clients = getClientsInRoom(room);
+    if (clients) {
+      return {
+        name: room!,
+        clients: clients,
+      };
+    }
+  }
+  return null;
+}
+
+function getClientsInRoom(room: string): string[] | null {
+  if (!rooms[room]) return [];
   return Array.from(rooms[room]);
 }
 
