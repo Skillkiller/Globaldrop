@@ -171,6 +171,7 @@ function App() {
               Globaldrop v{APP_VERSION} -{" "}
               <a
                 href="https://github.com/Skillkiller/Globaldrop"
+                target="_blank"
                 className="underline"
               >
                 GitHub
