@@ -45,7 +45,7 @@ function App() {
           port: import.meta.env.VITE_BACKEND_PORT,
           path: import.meta.env.VITE_BACKEND_PEER_PATH,
           secure: import.meta.env.VITE_PEER_SECURE === "true",
-        }); // Peer wird nur einmal erstellt
+        });
       }
 
       const getRoomData = async () => {
@@ -80,7 +80,6 @@ function App() {
         }
       };
 
-      // Beispiel: Event-Listener registrieren
       peerRef.current.on("open", (id) => {
         console.log("Peer ID:", id);
         setIdentNumber(id);
@@ -96,7 +95,7 @@ function App() {
         );
       });
 
-      // Cleanup: Peer-Instanz zerstören, aber nur beim Unmount der Komponente
+      // Cleanup peer instance un unmount
       return () => {
         if (peerRef.current) {
           peerRef.current.destroy();
@@ -117,8 +116,8 @@ function App() {
 
     return (
       <ThemeProvider storageKey="vite-ui-theme">
+        {/* Sidebar */}
         <div className="flex flex-col lg:flex-row min-h-screen">
-          {/* Sidebar */}
           <div className="w-full max-w-lg p-4 flex flex-col space-y-4">
             <Card>
               <CardHeader>
