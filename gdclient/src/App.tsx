@@ -129,7 +129,7 @@ function App() {
                 <div className="flex aspect-square items-center justify-center rounded-lg size-8 bg-primary text-primary-foreground">
                   <Droplet className="h-6 w-6" />
                 </div>
-                <p className="text-3xl">GlobalDrop</p>
+                <p className="text-3xl">Globaldrop</p>
               </div>
             </CardHeader>
           </Card>
