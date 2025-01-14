@@ -6,8 +6,8 @@ The data exchange is performed via P2P connections, with server communication on
 
 Devices on the local network are automatically detected. Devices from external networks must be added using the connection code.
 
-This is **my first project using React and Node.js**. So, you've been **warned!**
-This project was created as a learning exercise to explore React and Node.js technologies.
+This is **my first project using React and Node.js**. So, you've been **warned!** 
+This project was created as a learning exercise to explore React and Node.js technologies. The project is currently only available in german language.
 
 Globaldrop was built with the following technologies:
 * React / shadcn / tailwindcss
