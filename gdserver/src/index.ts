@@ -110,6 +110,20 @@ function quitRoom(room: string | null, client: IClient) {
   }
 }
 
+function quitRoomAlternative(client: IClient) {
+  const clientId = client.getId();
+
+  for (const [room, clients] of Object.entries(rooms)) {
+    if (clients.has(clientId)) {
+      clients.delete(clientId);
+      // Remove empty room
+      if (clients.size === 0) {
+        delete rooms[room];
+      }
+      break;
+    }
+  }
+}
 function getRoomData(room: string | null): RoomData | null {
   if (room) {
     const clients = getClientsInRoom(room);
@@ -133,5 +147,12 @@ peerServer.on("connection", (client) => {
 });
 
 peerServer.on("disconnect", (client) => {
-  quitRoom((client.getSocket() as unknown as WebSocketPlus).room, client);
+  quitRoomAlternative(client);
+  return;
+
+  if (client.getSocket()) {
+    quitRoom((client.getSocket() as unknown as WebSocketPlus).room, client);
+  } else {
+    quitRoomAlternative(client);
+  }
 });
