@@ -2,8 +2,6 @@ import { useRef, useEffect, useState, ChangeEvent } from "react";
 import Peer, { DataConnection } from "peerjs";
 import { Card, CardContent, CardHeader } from "./components/ui/card";
 import { GalleryVerticalEnd } from "lucide-react";
-import IdentShow from "./components/ident-show";
-import { Separator } from "./components/ui/separator";
 import { ConnectionCard } from "./components/connection-card";
 import { PeerEntity } from "./lib/Peer";
 import { addDataConnectionListener } from "./lib/utils";
@@ -13,6 +11,7 @@ import ProgressDialog, {
 } from "./components/dialog/progress-dialog";
 import PeerDisplay from "./components/PeerDisplay";
 import { ThemeProvider } from "./components/theme-provider";
+import { IdentCard } from "./components/ident-card";
 
 interface RoomData {
   name: string;
@@ -128,16 +127,13 @@ function App() {
             <CardHeader>
               <div className="flex flex-row items-center gap-4">
                 <div className="flex aspect-square items-center justify-center rounded-lg size-8 bg-primary text-primary-foreground">
-                  <GalleryVerticalEnd className="size-4" />
+                  <GalleryVerticalEnd className="h-6 w-6" />
                 </div>
                 <p className="text-3xl">GlobalDrop</p>
               </div>
-              <Separator></Separator>
             </CardHeader>
-            <CardContent className="flex w-full items-center justify-center ">
-              <IdentShow ident={identNumber}></IdentShow>
-            </CardContent>
           </Card>
+          <IdentCard ident={identNumber} />
           <ConnectionCard
             peerRef={peerRef}
             peers={peers}
