@@ -55,7 +55,14 @@ function App() {
         const backendRoomPath = import.meta.env.VITE_BACKEND_ROOM_PATH;
 
         const protocol = backendSecure ? "https" : "http";
-        const url = `${protocol}://${backendHost}:${backendPort}/${backendRoomPath}`;
+        const isStandardPort = (port: number, secure: boolean) =>
+          (secure && port === 443) || (!secure && port === 80);
+
+        const portPart = isStandardPort(backendPort, backendSecure)
+          ? ""
+          : `:${backendPort}`;
+
+        const url = `${protocol}://${backendHost}${portPart}/${backendRoomPath}`;
 
         try {
           const response = await fetch(url);
