@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState, ChangeEvent } from "react";
 import Peer, { DataConnection } from "peerjs";
 import { Card, CardContent, CardHeader } from "./components/ui/card";
-import { GalleryVerticalEnd } from "lucide-react";
+import { Droplet } from "lucide-react";
 import { ConnectionCard } from "./components/connection-card";
 import { PeerEntity } from "./lib/Peer";
 import { addDataConnectionListener } from "./lib/utils";
@@ -127,7 +127,7 @@ function App() {
             <CardHeader>
               <div className="flex flex-row items-center gap-4">
                 <div className="flex aspect-square items-center justify-center rounded-lg size-8 bg-primary text-primary-foreground">
-                  <GalleryVerticalEnd className="h-6 w-6" />
+                  <Droplet className="h-6 w-6" />
                 </div>
                 <p className="text-3xl">GlobalDrop</p>
               </div>
