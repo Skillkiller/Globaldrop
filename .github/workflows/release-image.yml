@@ -1,0 +1,110 @@
+name: Build docker images after release
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  client:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Extract version from package.json
+      id: extract_version
+      run: |
+        VERSION=$(jq -r '.version' ./gdclient/package.json)
+        echo "version=$VERSION" >> $GITHUB_ENV
+        echo "Extracted version: $VERSION"
+
+        TAG_VERSION="${GITHUB_REF##*/}"
+        CLEAN_TAG_VERSION="${TAG_VERSION#v}"
+
+        if [[ "$CLEAN_TAG_VERSION" != "$VERSION" ]]; then
+          echo "Error: Tag version ($TAG_VERSION) does not match package.json version ($VERSION)."
+          exit 1
+        fi
+
+    - name: Lowercase owner name
+      run: echo "OWNER_LC=$(echo ${GITHUB_REPOSITORY_OWNER,,})" >> $GITHUB_ENV
+
+    -  name: Collect docker metadata
+       id: meta
+       uses: docker/metadata-action@v5
+       with:
+         images: |
+           ghcr.io/${{ env.OWNER_LC }}/gdclient
+         tags: |
+           type=semver,pattern={{version}}
+           type=semver,pattern={{major}}.{{minor}}
+           type=sha
+           type=sha,format=long
+
+    - name: Push Docker image
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        context: ./gdclient/
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+  server:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Extract version from package.json
+      id: extract_version
+      run: |
+        VERSION=$(jq -r '.version' ./gdserver/package.json)
+        echo "version=$VERSION" >> $GITHUB_ENV
+        echo "Extracted version: $VERSION"
+
+        TAG_VERSION="${GITHUB_REF##*/}"
+        CLEAN_TAG_VERSION="${TAG_VERSION#v}"
+
+        if [[ "$CLEAN_TAG_VERSION" != "$VERSION" ]]; then
+          echo "Error: Tag version ($TAG_VERSION) does not match package.json version ($VERSION)."
+          exit 1
+        fi
+
+    - name: Lowercase owner name
+      run: echo "OWNER_LC=$(echo ${GITHUB_REPOSITORY_OWNER,,})" >> $GITHUB_ENV
+
+    -  name: Collect docker metadata
+       id: meta
+       uses: docker/metadata-action@v5
+       with:
+         images: |
+           ghcr.io/${{ env.OWNER_LC }}/gdserver
+         tags: |
+           type=semver,pattern={{version}}
+           type=semver,pattern={{major}}.{{minor}}
+           type=sha
+           type=sha,format=long
+
+    - name: Push Docker image
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        context: ./gdserver/
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
