@@ -44,7 +44,7 @@ function App() {
           host: import.meta.env.VITE_BACKEND_HOST,
           port: import.meta.env.VITE_BACKEND_PORT,
           path: import.meta.env.VITE_BACKEND_PEER_PATH,
-          secure: import.meta.env.VITE_PEER_SECURE === "true",
+          secure: import.meta.env.VITE_BACKEND_SECURE === "true",
         });
       }
 
