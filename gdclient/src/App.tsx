@@ -42,7 +42,17 @@ function App() {
         port: import.meta.env.VITE_BACKEND_PORT,
         path: import.meta.env.VITE_BACKEND_PEER_PATH,
         secure: import.meta.env.VITE_BACKEND_SECURE === "true",
+        config: {
+          iceServers: [
+            { urls: "stun:stun3.l.google.com:3478" },
+            { urls: "stun:stun3.l.google.com:5349" },
+            { urls: "stun:stun4.l.google.com:19302" },
+            { urls: "stun:stun4.l.google.com:5349" },
+          ],
+        },
       });
+
+      console.log(peerRef.current.options);
     }
 
     const getRoomData = async () => {
